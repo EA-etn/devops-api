@@ -9,14 +9,20 @@ on:
 permissions:
   contents: read
 
+env:
+  # Arquitecturas para las que se construye la imagen:
+  #   amd64 -> PCs y servidores x86
+  #   arm64 -> Raspberry Pi 3/4/5 (SO de 64 bits), Apple Silicon, AWS Graviton
+  PLATFORMS: linux/amd64,linux/arm64
+
 jobs:
   lint-test:
     name: Lint y tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -40,7 +46,10 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+
+      # QEMU emula otros procesadores (ARM) en el runner x86 de GitHub
+      - uses: docker/setup-qemu-action@v3
 
       - uses: docker/setup-buildx-action@v3
 
@@ -63,10 +72,11 @@ jobs:
             type=semver,pattern={{version}}
             type=sha,prefix=sha-
 
-      - name: Build (y push si no es PR)
+      - name: Build multi-arquitectura (y push si no es PR)
         uses: docker/build-push-action@v6
         with:
           context: .
+          platforms: ${{ env.PLATFORMS }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -74,10 +84,26 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Smoke test de la imagen
+      # En los PR arrancamos la imagen de CADA arquitectura y comprobamos /health.
+      # La de arm64 corre emulada con QEMU: si arranca aquí, arrancará en una Raspberry Pi.
+      - name: Smoke test por arquitectura
         if: github.event_name == 'pull_request'
         run: |
-          docker build -t devops-api:test .
-          docker run -d --name api -p 8000:8000 devops-api:test
-          for i in $(seq 1 10); do curl -fs localhost:8000/health && exit 0; sleep 1; done
-          docker logs api; exit 1
+          for platform in ${PLATFORMS//,/ }; do
+            arch="${platform#linux/}"
+            echo "::group::Smoke test $platform"
+            docker buildx build --platform "$platform" --load \
+              --cache-from type=gha -t "devops-api:test-$arch" .
+            docker run -d --name "api-$arch" --platform "$platform" \
+              -p 8000:8000 "devops-api:test-$arch"
+            ok=0
+            for i in $(seq 1 30); do
+              if curl -fs localhost:8000/health; then ok=1; break; fi
+              sleep 2
+            done
+            echo
+            docker exec "api-$arch" uname -m
+            [ "$ok" = 1 ] || { docker logs "api-$arch"; exit 1; }
+            docker rm -f "api-$arch"
+            echo "::endgroup::"
+          done

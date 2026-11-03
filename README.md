@@ -51,6 +51,21 @@ push / PR ──► lint-test (ruff + pytest) ──► build-push (Docker)
 - **Push a `main`**: además publica la imagen en GHCR → `ghcr.io/<usuario>/<repo>:main` y `:sha-xxxxxxx`.
 - **Tag `v1.2.3`**: publica `ghcr.io/<usuario>/<repo>:1.2.3`.
 - Caché de capas Docker con GitHub Actions cache.
+- **Imagen multi-arquitectura**: `linux/amd64` y `linux/arm64` bajo la misma etiqueta.
+  Docker descarga automáticamente la variante de cada máquina.
+- En los PR, la imagen se arranca en **ambas arquitecturas** (arm64 emulada con QEMU).
+
+## Raspberry Pi
+
+Funciona en Raspberry Pi 3/4/5 con **sistema operativo de 64 bits** (arm64):
+
+```bash
+docker run -p 8000:8000 ghcr.io/ea-etn/devops-api:main
+curl localhost:8000/info
+```
+
+Comprueba tu arquitectura con `uname -m` → debe decir `aarch64`.
+Raspberry Pi OS de 32 bits (`armv7l`) no está soportado.
 
 Para lanzar una release:
 

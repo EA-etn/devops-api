@@ -31,6 +31,7 @@ env:
   PLATFORMS: linux/amd64,linux/arm64
   K3D_VERSION: v5.9.0
   KUBECONFORM_VERSION: v0.8.0
+  TRIVY_VERSION: v0.76.1
 
 jobs:
   # ---------------------------------------------------------------- CI: código
@@ -70,6 +71,7 @@ jobs:
       - name: Trivy (informe SARIF)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          version: ${{ env.TRIVY_VERSION }}
           scan-type: fs
           scan-ref: .
           scanners: vuln,secret,misconfig
@@ -89,6 +91,7 @@ jobs:
       - name: Trivy (puerta de calidad)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          version: ${{ env.TRIVY_VERSION }}
           scan-type: fs
           scan-ref: .
           scanners: vuln,secret,misconfig
@@ -148,6 +151,7 @@ jobs:
       - name: Trivy (escaneo de la imagen)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          version: ${{ env.TRIVY_VERSION }}
           image-ref: devops-api:ci
           severity: HIGH,CRITICAL
           ignore-unfixed: true
@@ -258,6 +262,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          version: ${{ env.TRIVY_VERSION }}
           image-ref: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
           severity: HIGH,CRITICAL
           ignore-unfixed: true

@@ -1,0 +1,84 @@
+<!-- size: 1800x1000 -->
+<div class="title">
+  <div class="eyebrow">devops-api · github actions</div>
+  <h1>Pipeline CI/CD</h1>
+</div>
+
+<!-- Pull request -->
+<div class="zone" style="--c:var(--blue);left:40px;top:140px;width:1720px;height:420px"><div class="zl">on: pull_request</div></div>
+<div class="card" id="pr" style="--c:var(--purple);left:70px;top:290px;width:280px">
+  <div class="ico"><i data-icon="git-pull-request"></i></div>
+  <div><h3>Pull request</h3><div class="sub">cambio propuesto</div></div>
+</div>
+
+<div class="zone" id="s1" style="--c:#64748b;left:370px;top:175px;width:400px;height:360px"><div class="zl">1 · calidad (en paralelo)</div></div>
+<div class="card" style="--c:var(--blue);left:395px;top:215px;width:350px">
+  <div class="ico"><i data-icon="test-tube-diagonal"></i></div>
+  <div><h3>Lint y tests</h3><div class="sub">ruff · pytest</div></div>
+</div>
+<div class="card" style="--c:var(--red);left:395px;top:322px;width:350px">
+  <div class="ico"><i data-icon="shield-alert"></i></div>
+  <div><h3>Seguridad</h3><div class="sub">Trivy → pestaña Security</div></div>
+</div>
+<div class="card" style="--c:var(--blue);left:395px;top:429px;width:350px">
+  <div class="ico"><i data-icon="anchor"></i></div>
+  <div><h3>Helm</h3><div class="sub">lint · kubeconform</div></div>
+</div>
+
+<div class="zone" id="s2" style="--c:#64748b;left:870px;top:175px;width:400px;height:360px"><div class="zl">2 · build y pruebas</div></div>
+<div class="card" style="--c:var(--cyan);left:895px;top:245px;width:350px">
+  <div class="ico"><i data-icon="boxes"></i></div>
+  <div><h3>E2E en k3s</h3><div class="sub">3 nodos · helm test</div></div>
+</div>
+<div class="card" style="--c:var(--blue);left:895px;top:390px;width:350px">
+  <div class="ico"><i data-icon="layers"></i></div>
+  <div><h3>Build multi-arch</h3><div class="sub">amd64 · arm64 (QEMU)</div></div>
+</div>
+
+<div class="card col" id="ok" style="--c:var(--green);left:1370px;top:255px;width:360px">
+  <div class="head"><div class="ico"><i data-icon="circle-check"></i></div>
+    <div><h3>Checks en verde</h3><div class="sub">el merge se permite</div></div></div>
+  <div class="pills" style="--c:var(--red)"><span class="pill">si falla, se bloquea</span></div>
+</div>
+
+<!-- main -->
+<div class="zone" style="--c:var(--purple);left:40px;top:620px;width:1720px;height:270px"><div class="zl">on: push → main</div></div>
+<div class="card" id="m1" style="--c:var(--purple);left:70px;top:700px;width:300px">
+  <div class="ico"><i data-icon="git-merge"></i></div>
+  <div><h3>Merge</h3><div class="sub">a main</div></div>
+</div>
+<div class="card" id="m2" style="--c:var(--orange);left:410px;top:700px;width:300px">
+  <div class="ico"><i data-icon="container"></i></div>
+  <div><h3>Build y push</h3><div class="sub">GHCR · SBOM · SLSA</div></div>
+</div>
+<div class="card" id="m3" style="--c:var(--red);left:750px;top:700px;width:300px">
+  <div class="ico"><i data-icon="scan-search"></i></div>
+  <div><h3>Trivy</h3><div class="sub">imagen publicada</div></div>
+</div>
+<div class="card" id="m4" style="--c:var(--orange);left:1090px;top:700px;width:300px">
+  <div class="ico"><i data-icon="file-signature"></i></div>
+  <div><h3>Firma</h3><div class="sub">Cosign keyless</div></div>
+</div>
+<div class="card" id="m5" style="--c:var(--green);left:1430px;top:700px;width:300px">
+  <div class="ico"><i data-icon="git-commit-horizontal"></i></div>
+  <div><h3>GitOps</h3><div class="sub">commit del tag</div></div>
+</div>
+<div style="position:absolute;left:70px;top:832px;font:500 16px Inter;color:var(--muted)">Si un paso falla, el pipeline se detiene: ninguna imagen sin escanear ni firmar llega al clúster.</div>
+
+<div class="legend" style="top:930px">
+  <span style="--c:var(--blue)"><i></i>Validación</span>
+  <span style="--c:var(--red)"><i></i>Seguridad</span>
+  <span style="--c:var(--orange)"><i></i>Cadena de suministro</span>
+  <span style="--c:var(--green)"><i></i>GitOps</span>
+</div>
+
+<script>
+wire('pr:right', 's1:left');
+wire('s1:right', 's2:left', { label: 'needs' });
+wire('s2:right', 'ok:left');
+wire('ok:bottom', 'm1:top', { label: 'merge', mid: 590 });
+wire('m1:right', 'm2:left');
+wire('m2:right', 'm3:left');
+wire('m3:right', 'm4:left');
+wire('m4:right', 'm5:left');
+</script>

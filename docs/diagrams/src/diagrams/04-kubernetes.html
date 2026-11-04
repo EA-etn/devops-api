@@ -1,0 +1,82 @@
+<!-- size: 1800x935 -->
+<div class="title">
+  <div class="eyebrow">devops-api · helm chart en kubernetes</div>
+  <h1>Despliegue en el clúster</h1>
+</div>
+
+<div class="card" id="user" style="--c:var(--purple);left:40px;top:250px;width:270px">
+  <div class="ico"><i data-icon="user"></i></div>
+  <div><h3>Usuario</h3><div class="sub">navegador · curl</div></div>
+</div>
+
+<div class="zone" id="cl" style="--c:var(--green);left:360px;top:140px;width:1030px;height:695px"><div class="zl">clúster k3s · namespace devops-api</div></div>
+<div class="card" id="ing" style="--c:var(--blue);left:390px;top:200px;width:420px">
+  <div class="ico"><i data-icon="route"></i></div>
+  <div><h3>Ingress</h3><div class="sub">Traefik · devops-api.home.arpa</div></div>
+</div>
+<div class="card" id="svc" style="--c:var(--blue);left:390px;top:340px;width:420px">
+  <div class="ico"><i data-icon="network"></i></div>
+  <div><h3>Service</h3><div class="sub mono">ClusterIP :80 → :8000</div></div>
+</div>
+<div class="card" id="dep" style="--c:var(--cyan);left:390px;top:480px;width:420px">
+  <div class="ico"><i data-icon="boxes"></i></div>
+  <div><h3>Deployment</h3><div class="sub">rolling update sin caída</div></div>
+</div>
+<div class="card" id="hpa" style="--c:var(--yellow);left:390px;top:650px;width:200px;padding:16px">
+  <div class="ico"><i data-icon="gauge"></i></div>
+  <div><h3>HPA</h3><div class="sub">2–4 pods</div></div>
+</div>
+<div class="card" id="pdb" style="--c:var(--yellow);left:610px;top:650px;width:200px;padding:16px">
+  <div class="ico"><i data-icon="shield"></i></div>
+  <div><h3>PDB</h3><div class="sub">mín. 1</div></div>
+</div>
+
+<div class="zone" id="npi" style="--c:var(--cyan);left:870px;top:200px;width:490px;height:190px"><div class="zl">raspberry-pi · arm64</div></div>
+<div class="card" style="--c:var(--green);left:895px;top:255px;width:215px;padding:16px">
+  <div class="ico"><i data-icon="box"></i></div><div><h3>pod</h3><div class="sub">probes ✓</div></div>
+</div>
+<div class="card" style="--c:var(--green);left:1125px;top:255px;width:215px;padding:16px">
+  <div class="ico"><i data-icon="box"></i></div><div><h3>pod</h3><div class="sub">probes ✓</div></div>
+</div>
+
+<div class="zone" id="npc" style="--c:var(--cyan);left:870px;top:430px;width:490px;height:190px"><div class="zl">pc · amd64</div></div>
+<div class="card" style="--c:var(--green);left:895px;top:485px;width:215px;padding:16px">
+  <div class="ico"><i data-icon="box"></i></div><div><h3>pod</h3><div class="sub">probes ✓</div></div>
+</div>
+<div class="card" style="--c:var(--green);left:1125px;top:485px;width:215px;padding:16px">
+  <div class="ico"><i data-icon="box"></i></div><div><h3>pod</h3><div class="sub">probes ✓</div></div>
+</div>
+
+<div class="card col" style="--c:var(--red);left:870px;top:660px;width:490px">
+  <div class="head"><div class="ico"><i data-icon="lock"></i></div>
+    <div><h3>Seguridad del pod</h3><div class="sub">Pod Security Standards "restricted"</div></div></div>
+  <div class="pills" style="--c:var(--red)"><span class="pill">no root</span><span class="pill">solo lectura</span><span class="pill">sin capabilities</span><span class="pill">seccomp</span></div>
+</div>
+
+<div class="card" id="argo" style="--c:var(--orange);left:1440px;top:200px;width:320px">
+  <div class="ico"><i data-icon="refresh-cw"></i></div>
+  <div><h3>ArgoCD</h3><div class="sub">aplica el chart desde Git</div></div>
+</div>
+<div class="card" id="prom" style="--c:var(--orange);left:1440px;top:480px;width:320px">
+  <div class="ico"><i data-icon="activity"></i></div>
+  <div><h3>Prometheus</h3><div class="sub">próximo paso</div></div>
+</div>
+
+<div class="legend" style="top:873px">
+  <span style="--c:var(--blue)"><i></i>Tráfico</span>
+  <span style="--c:var(--cyan)"><i></i>Carga de trabajo</span>
+  <span style="--c:var(--yellow)"><i></i>Disponibilidad</span>
+  <span style="--c:var(--orange)"><i></i>Operación</span>
+</div>
+
+<script>
+wire('user:right', 'ing:left', { label: 'HTTP' });
+wire('ing:bottom', 'svc:top');
+wire('svc:bottom', 'dep:top');
+wire('dep:right', 'npi:left', { mid: 840 });
+wire('dep:right', 'npc:left', { mid: 840 });
+wire('hpa:top', 'dep:bottom@0.24', { label: 'escala' });
+wire('pdb:top', 'dep:bottom@0.76', { dashed: true });
+wire('argo:left', 'cl:right@0.12', { label: 'sync' });
+wire('prom:left', 'npc:right', { label: '/metrics', dashed: true });
+</script>

@@ -1,0 +1,88 @@
+<!-- size: 1800x960 -->
+<div class="title">
+  <div class="eyebrow">devops-api · seguridad de la cadena de suministro</div>
+  <h1>Cada imagen se escanea, se firma y es verificable</h1>
+</div>
+
+<div class="zone" id="za" style="--c:var(--red);left:40px;top:140px;width:380px;height:560px"><div class="zl">1 · antes del build</div></div>
+<div class="card" style="--c:var(--red);left:65px;top:200px;width:330px">
+  <div class="ico"><i data-icon="lock"></i></div>
+  <div><h3>Actions por SHA</h3><div class="sub">inmutables</div></div>
+</div>
+<div class="card" style="--c:var(--red);left:65px;top:330px;width:330px">
+  <div class="ico"><i data-icon="bot"></i></div>
+  <div><h3>Dependabot</h3><div class="sub">parches semanales</div></div>
+</div>
+<div class="card" style="--c:var(--red);left:65px;top:460px;width:330px">
+  <div class="ico"><i data-icon="scan-search"></i></div>
+  <div><h3>Trivy en código</h3><div class="sub">deps · secretos · config</div></div>
+</div>
+
+<div class="zone" id="zb" style="--c:var(--blue);left:470px;top:140px;width:400px;height:560px"><div class="zl">2 · build</div></div>
+<div class="card" id="bk" style="--c:var(--blue);left:495px;top:200px;width:350px">
+  <div class="ico"><i data-icon="layers"></i></div>
+  <div><h3>BuildKit</h3><div class="sub">amd64 · arm64</div></div>
+</div>
+<div class="card" id="img" style="--c:var(--blue);left:520px;top:340px;width:325px">
+  <div class="ico"><i data-icon="container"></i></div>
+  <div><h3>Imagen</h3><div class="sub">multi-arquitectura</div></div>
+</div>
+<div class="card" id="sbom" style="--c:var(--blue);left:520px;top:460px;width:325px">
+  <div class="ico"><i data-icon="file-text"></i></div>
+  <div><h3>SBOM</h3><div class="sub">inventario de paquetes</div></div>
+</div>
+<div class="card" id="prov" style="--c:var(--blue);left:520px;top:580px;width:325px">
+  <div class="ico"><i data-icon="scroll-text"></i></div>
+  <div><h3>Provenance</h3><div class="sub">SLSA: cómo se construyó</div></div>
+</div>
+
+<div class="zone" style="--c:var(--orange);left:920px;top:140px;width:400px;height:560px"><div class="zl">3 · escaneo y firma</div></div>
+<div class="card" id="gate" style="--c:var(--orange);left:945px;top:200px;width:350px">
+  <div class="ico"><i data-icon="shield-alert"></i></div>
+  <div><h3>Trivy</h3><div class="sub">falla con HIGH/CRITICAL</div></div>
+</div>
+<div class="card" id="cos" style="--c:var(--orange);left:945px;top:360px;width:350px">
+  <div class="ico"><i data-icon="file-signature"></i></div>
+  <div><h3>Cosign keyless</h3><div class="sub">identidad: el workflow</div></div>
+</div>
+<div class="card" id="sig" style="--c:var(--orange);left:945px;top:560px;width:350px">
+  <div class="ico"><i data-icon="fingerprint"></i></div>
+  <div><h3>Sigstore</h3><div class="sub">certificado + registro</div></div>
+</div>
+
+<div class="zone" style="--c:var(--purple);left:1370px;top:140px;width:390px;height:560px"><div class="zl">4 · publicación</div></div>
+<div class="card col" id="ghcr" style="--c:var(--purple);left:1395px;top:200px;width:340px">
+  <div class="head"><div class="ico"><i data-icon="package-check"></i></div>
+    <div><h3>GHCR</h3><div class="sub mono">devops-api:0.1.0</div></div></div>
+  <div class="pills" style="--c:var(--purple)"><span class="pill">imagen</span><span class="pill">firma</span><span class="pill">SBOM</span><span class="pill">provenance</span></div>
+</div>
+<div class="card col" id="ver" style="--c:var(--green);left:1395px;top:470px;width:340px">
+  <div class="head"><div class="ico"><i data-icon="badge-check"></i></div>
+    <div><h3>cosign verify</h3><div class="sub">cualquiera lo comprueba</div></div></div>
+  <div class="pills" style="--c:var(--green)"><span class="pill mono">✓ firmada por ci.yml</span></div>
+</div>
+
+<div class="card" style="--c:#334155;left:40px;top:745px;width:1720px;padding:22px 26px">
+  <div class="ico" style="--c:var(--yellow)"><i data-icon="shield-check"></i></div>
+  <div><h3>Si cualquier paso falla, el pipeline se detiene</h3>
+    <div class="sub">Ninguna imagen sin escanear ni firmar llega al clúster. La firma demuestra quién la construyó y que no fue alterada.</div></div>
+</div>
+
+<div class="legend" style="top:893px">
+  <span style="--c:var(--red)"><i></i>Prevención</span>
+  <span style="--c:var(--blue)"><i></i>Build</span>
+  <span style="--c:var(--orange)"><i></i>Escaneo y firma</span>
+  <span style="--c:var(--purple)"><i></i>Publicación</span>
+</div>
+
+<script>
+wire('za:right', 'zb:left');
+wire('bk:left@0.8', 'img:left', { mid: 484 });
+wire('bk:left@0.8', 'sbom:left', { mid: 484 });
+wire('bk:left@0.8', 'prov:left', { mid: 484 });
+wire('img:right', 'gate:left', { mid: 895 });
+wire('gate:bottom', 'cos:top', { label: 'sin hallazgos' });
+wire('cos:bottom', 'sig:top', { label: 'OIDC', dashed: true });
+wire('cos:right', 'ghcr:left@0.6', { label: 'firma' });
+wire('ghcr:bottom', 'ver:top', { label: 'pull' });
+</script>

@@ -276,6 +276,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # ArgoCD vigila Git, no el registro: escribimos en Git la versión exacta a desplegar
+      # Sin "[skip ci]": los push hechos con GITHUB_TOKEN no disparan workflows (no hay bucle),
+      # y "[skip ci]" impediría que un tag/release creado sobre este commit ejecute el pipeline.
       - name: Actualizar image.tag en values-homelab.yaml
         run: |
           TAG="sha-${GITHUB_SHA::7}"
@@ -284,6 +286,6 @@ jobs:
           if git diff --quiet; then echo "Sin cambios"; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -am "chore(gitops): desplegar ${TAG} en homelab [skip ci]"
+          git commit -am "chore(gitops): desplegar ${TAG} en homelab"
           git pull --rebase origin main
           git push origin HEAD:main

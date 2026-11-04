@@ -13,28 +13,66 @@ API mínima en **FastAPI** usada como hilo conductor para practicar el ciclo Dev
 
 ## Arquitectura
 
-```
- Developer ──► Pull Request ──────────────────────────────────────────────────────┐
-                    │                                                             │
-                    ▼                       GitHub Actions (CI)                   │
-   ┌─────────────────────────────────────────────────────────────────────┐        │
-   │ lint-test   ruff + pytest                                           │        │
-   │ security    Trivy: dependencias, secretos, Dockerfile, Helm ─► Security tab  │
-   │ helm        helm lint + kubeconform                                 │        │
-   │ e2e-k3s     imagen ─► Trivy ─► clúster k3s de 3 nodos ─► helm test  │        │
-   │ build       multi-arch amd64/arm64 + smoke test arm64 (QEMU)        │        │
-   └─────────────────────────────────────────────────────────────────────┘        │
-                    │ merge a main                                                │
-                    ▼                       GitHub Actions (CD)                   │
-   ┌─────────────────────────────────────────────────────────────────────┐        │
-   │ build       push a GHCR + SBOM + provenance + Trivy + firma Cosign  │        │
-   │ gitops      commit: values-homelab.yaml  image.tag = sha-xxxxxxx    │────────┘
-   └─────────────────────────────────────────────────────────────────────┘   (Git = fuente de verdad)
-                                                                    │
-                          ArgoCD (en el clúster) vigila Git ◄───────┘
-                                    │  sync automático + selfHeal
-                                    ▼
-                 Homelab k3s:  Raspberry Pi (arm64)  +  PC (amd64)
+> Diagrama como código ([Mermaid](https://mermaid.js.org)): GitHub lo dibuja a partir de este texto, así que se versiona y se revisa en los PR igual que el código.
+
+```mermaid
+flowchart TB
+    dev([Developer])
+
+    subgraph CI["CI · GitHub Actions · cada pull request"]
+        direction TB
+        subgraph T["2 · Build y pruebas"]
+            direction LR
+            e2e["E2E en k3s<br/><small>3 nodos · helm test · rolling update</small>"]
+            multi["Build multi-arch<br/><small>amd64 · arm64 con QEMU</small>"]
+        end
+        subgraph Q["1 · Calidad"]
+            direction LR
+            lint["Lint y tests<br/><small>ruff · pytest</small>"]
+            sec["Seguridad<br/><small>Trivy: deps · secretos · misconfig</small>"]
+            helm["Helm<br/><small>lint · kubeconform</small>"]
+        end
+    end
+
+    subgraph CD["CD · GitHub Actions · main"]
+        direction LR
+        push["Imagen en GHCR<br/><small>amd64 + arm64 · SBOM · provenance</small>"]
+        scan["Trivy<br/><small>imagen publicada</small>"]
+        sign["Firma<br/><small>Cosign keyless</small>"]
+        bot["Bot GitOps<br/><small>values-homelab.yaml</small>"]
+        push --> scan --> sign --> bot
+    end
+
+    subgraph LAB["Homelab k3s · próximo paso"]
+        direction LR
+        argo["ArgoCD<br/><small>sync · selfHeal · prune</small>"]
+        pi["Raspberry Pi<br/><small>arm64 · control plane</small>"]
+        pc["PC<br/><small>amd64 · worker</small>"]
+        argo --> pi
+        argo --> pc
+    end
+
+    dev -->|pull request| CI
+    CI -->|merge a main| CD
+    CD -->|Git = fuente de verdad| LAB
+
+    classDef ci fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef secc fill:#ffe4e6,stroke:#e11d48,color:#881337
+    classDef cd fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    classDef git fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef lab fill:#cffafe,stroke:#0891b2,color:#164e63
+    classDef actor fill:#f1f5f9,stroke:#475569,color:#0f172a
+    class lint,helm,e2e,multi ci
+    class sec,scan secc
+    class push,sign cd
+    class bot git
+    class argo,pi,pc lab
+    class dev actor
+    style CI fill:#f8fafc,stroke:#94a3b8
+    style Q fill:#ffffff,stroke:#cbd5e1
+    style T fill:#ffffff,stroke:#cbd5e1
+    style CD fill:#f8fafc,stroke:#94a3b8
+    style LAB fill:#f8fafc,stroke:#0891b2,stroke-dasharray: 6 4
 ```
 
 ## Endpoints

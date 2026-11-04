@@ -1,0 +1,36 @@
+<!-- size: 1280x640 -->
+<!-- Imagen de vista previa para redes sociales (GitHub → Settings → Social preview) -->
+<div class="title" style="left:72px;top:70px">
+  <div class="eyebrow">github.com/EA-etn/devops-api</div>
+  <h1 style="font-size:76px;margin-top:10px">devops-api</h1>
+  <p style="font:600 34px Inter;color:#e8eefc;margin-top:14px">Cada commit: <span style="color:#3b82f6">probado</span>, <span style="color:#f97316">firmado</span> y <span style="color:#10b981">desplegado</span>.</p>
+</div>
+
+<div class="card" id="s1" style="--c:var(--blue);left:72px;top:360px;width:200px;padding:16px">
+  <div class="ico"><i data-icon="test-tube-diagonal"></i></div><div><h3>Test</h3><div class="sub">k3s E2E</div></div>
+</div>
+<div class="card" id="s2" style="--c:var(--red);left:310px;top:360px;width:200px;padding:16px">
+  <div class="ico"><i data-icon="shield-alert"></i></div><div><h3>Scan</h3><div class="sub">Trivy</div></div>
+</div>
+<div class="card" id="s3" style="--c:var(--orange);left:548px;top:360px;width:200px;padding:16px">
+  <div class="ico"><i data-icon="file-signature"></i></div><div><h3>Sign</h3><div class="sub">Cosign</div></div>
+</div>
+<div class="card" id="s4" style="--c:var(--purple);left:786px;top:360px;width:200px;padding:16px">
+  <div class="ico"><i data-icon="container"></i></div><div><h3>Ship</h3><div class="sub">multi-arch</div></div>
+</div>
+<div class="card" id="s5" style="--c:var(--green);left:1024px;top:360px;width:190px;padding:16px">
+  <div class="ico"><i data-icon="refresh-cw"></i></div><div><h3>Sync</h3><div class="sub">GitOps</div></div>
+</div>
+
+<div style="position:absolute;left:72px;top:520px;display:flex;gap:12px">
+  <span class="pill mono" style="--c:#94a3b8">GitHub Actions</span><span class="pill mono" style="--c:#94a3b8">Docker</span>
+  <span class="pill mono" style="--c:#94a3b8">Helm</span><span class="pill mono" style="--c:#94a3b8">Kubernetes</span>
+  <span class="pill mono" style="--c:#94a3b8">ArgoCD</span><span class="pill mono" style="--c:#94a3b8">SBOM · SLSA</span>
+</div>
+
+<script>
+wire('s1:right', 's2:left');
+wire('s2:right', 's3:left');
+wire('s3:right', 's4:left');
+wire('s4:right', 's5:left');
+</script>

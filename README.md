@@ -188,7 +188,7 @@ Publish a release from GitHub (**Releases → Draft a new release**, tag `vX.Y.Z
 
 ## Lessons learned
 
-Real incidents hit while building this project:
+Real incidents hit while building this project ([infographic](docs/diagrams/en/05-incidents.png)):
 
 | Problem | Root cause | Fix |
 |---|---|---|

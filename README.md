@@ -1,202 +1,212 @@
+<div align="center">
+
 # devops-api
 
+**Every commit: tested, signed, shipped.**
+
+A secure CI/CD pipeline for a small Python API: multi-arch images, supply-chain security,
+Kubernetes E2E tests on every pull request and GitOps delivery.
+
 [![CI/CD](https://github.com/EA-etn/devops-api/actions/workflows/ci.yml/badge.svg)](https://github.com/EA-etn/devops-api/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/EA-etn/devops-api?color=8b5cf6)](https://github.com/EA-etn/devops-api/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-10b981)](LICENSE)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-k3s-326CE5?logo=kubernetes&logoColor=white)
+![Signed with Cosign](https://img.shields.io/badge/signed-Cosign-f97316?logo=sigstore&logoColor=white)
 
-API mínima en **FastAPI** usada como hilo conductor para practicar el ciclo DevOps completo:
-**código → tests → seguridad → contenedor multi-arquitectura firmado → Kubernetes → GitOps**.
+**English** · [Español](README.es.md)
 
-> La aplicación es deliberadamente simple. Lo importante es **cómo se construye, se asegura, se prueba y se despliega**.
+<img src="docs/diagrams/en/01-general.svg" alt="Architecture overview: code, CI/CD, supply chain and runtime layers" width="100%">
 
-<p align="center"><img src="docs/diagrams/01-general.png" alt="Arquitectura general de devops-api: del commit al clúster"></p>
+</div>
 
-## Arquitectura
+## Why this project
 
-En una línea:
+The app is intentionally tiny. The point is **everything around it**: the same practices a
+platform team uses to ship software safely.
 
-```mermaid
-flowchart LR
-    A["Código<br/><small>GitHub</small>"] -->|pull request| B["CI<br/><small>tests · seguridad · k3s</small>"]
-    B -->|merge| C["CD<br/><small>imagen firmada</small>"]
-    C -->|GitOps| D["ArgoCD<br/><small>homelab · próximo paso</small>"]
-```
+- **Nothing broken reaches `main`:** every pull request runs tests, security scans and a real
+  deployment on a 3-node Kubernetes cluster.
+- **Every image is verifiable:** scanned with Trivy, shipped with an SBOM and provenance, and
+  signed with Cosign, with no keys to manage.
+- **Git is the source of truth:** the pipeline writes the exact version to deploy, and ArgoCD
+  syncs the cluster from Git.
 
-### Diagramas detallados
+## Highlights
 
-| Diagrama | Qué muestra |
+| Area | What you get |
 |---|---|
-| [Pipeline CI/CD](docs/diagrams/02-pipeline.png) | Los jobs de cada pull request y la cadena de pasos en `main` |
-| [Cadena de suministro](docs/diagrams/03-supply-chain.png) | Cómo se escanea, firma y verifica cada imagen |
-| [Kubernetes](docs/diagrams/04-kubernetes.png) | Cómo se despliega el Helm chart en el clúster |
+| 🐳 **Container** | Multi-stage build · non-root user · healthcheck · `amd64` + `arm64` (runs on a Raspberry Pi) |
+| 🔐 **DevSecOps** | Trivy (deps, secrets, misconfig, image) · SBOM · SLSA provenance · Cosign keyless · Dependabot · SHA-pinned actions |
+| ☸️ **Kubernetes** | Helm chart with *restricted* Pod Security, probes, PDB, HPA, topology spread and `helm test` |
+| 🧪 **CI** | E2E on an ephemeral **3-node k3s cluster** in every PR, including a zero-downtime rolling update |
+| 🔄 **GitOps** | Automatic image-tag commit after each merge + ArgoCD `Application` (auto-sync, self-heal, prune) |
+| 📊 **Observability** | `/metrics` endpoint in Prometheus format |
 
-<details>
-<summary>Ver los diagramas aquí</summary>
-
-![Pipeline CI/CD](docs/diagrams/02-pipeline.png)
-![Cadena de suministro](docs/diagrams/03-supply-chain.png)
-![Kubernetes](docs/diagrams/04-kubernetes.png)
-
-</details>
-
-Los diagramas son código (HTML + iconos Lucide): ver [`docs/diagrams/src`](docs/diagrams/src).
-
-## Endpoints
-
-| Ruta       | Descripción                                                  |
-|------------|--------------------------------------------------------------|
-| `/`        | Mensaje de bienvenida y versión                              |
-| `/health`  | Health check (Docker HEALTHCHECK y probes de Kubernetes)     |
-| `/info`    | Hostname (= nombre del pod), versión y hora UTC              |
-| `/metrics` | Métricas en formato Prometheus (peticiones, latencias, códigos) |
-| `/docs`    | Documentación interactiva (Swagger)                          |
-
-## Inicio rápido
+## Quick start
 
 ```bash
-make install      # entorno virtual + dependencias
-make test         # tests
-make run          # API en http://localhost:8000 con recarga automática
-make help         # todos los comandos
-```
-
-Con Docker (la imagen publicada funciona en PC x86 y en Raspberry Pi 64 bits):
-
-```bash
-docker run -p 8000:8000 ghcr.io/ea-etn/devops-api:main
+docker run -p 8000:8000 ghcr.io/ea-etn/devops-api:0.1.0
 curl localhost:8000/info
 ```
 
-## Qué incluye
-
-### 🐳 Contenedor
-
-- **Multi-stage build**: las herramientas de instalación no llegan a la imagen final.
-- **Usuario sin privilegios** con UID numérico (`10001`), compatible con `runAsNonRoot`.
-- **HEALTHCHECK** nativo contra `/health`.
-- **Multi-arquitectura**: `linux/amd64` + `linux/arm64` bajo la misma etiqueta.
-
-### 🔐 Seguridad (DevSecOps)
-
-| Control | Herramienta | Cuándo |
-|---|---|---|
-| Vulnerabilidades en dependencias | Trivy (`fs`) | Cada PR y push |
-| Secretos filtrados en el código | Trivy (`secret`) | Cada PR y push |
-| Malas configuraciones (Dockerfile, Helm) | Trivy (`misconfig`) | Cada PR y push |
-| Vulnerabilidades de la imagen | Trivy (`image`) | PR (imagen local) y main (imagen publicada) |
-| Inventario de componentes (SBOM) | BuildKit (SPDX) | Cada imagen publicada |
-| Procedencia del build (SLSA provenance) | BuildKit | Cada imagen publicada |
-| Firma de la imagen | Cosign keyless (Sigstore) | Cada imagen publicada |
-| Actualizaciones de dependencias | Dependabot (pip, actions, docker) | Semanal |
-| Actions fijadas por SHA de commit | — | Siempre |
-
-Los resultados de Trivy aparecen en la pestaña **Security → Code scanning** del repositorio.
-El pipeline **falla** ante cualquier hallazgo HIGH/CRITICAL que tenga solución disponible.
-
-**Verificar la firma de una imagen** (demuestra que la construyó este pipeline y no fue alterada):
+Or from source:
 
 ```bash
-cosign verify ghcr.io/ea-etn/devops-api:main \
+make install   # virtualenv + dependencies
+make test      # tests
+make run       # http://localhost:8000/docs
+make help      # every command
+```
+
+| Endpoint | Description |
+|---|---|
+| `/health` | Health check (Docker `HEALTHCHECK` and Kubernetes probes) |
+| `/info` | Hostname (= pod name), version and UTC time |
+| `/metrics` | Prometheus metrics (requests, latency, status codes) |
+| `/docs` | Interactive API docs (Swagger) |
+
+## Architecture
+
+### CI/CD pipeline
+
+<img src="docs/diagrams/en/02-pipeline.svg" alt="CI/CD pipeline: quality checks and k3s E2E on pull requests; build, scan, sign and GitOps on main" width="100%">
+
+### Supply chain security
+
+<img src="docs/diagrams/en/03-supply-chain.svg" alt="Supply chain: prevention, build, scan and sign, publish and verify" width="100%">
+
+### Kubernetes deployment
+
+<img src="docs/diagrams/en/04-kubernetes.svg" alt="Kubernetes: ingress, service, deployment and pods across a Raspberry Pi and a PC" width="100%">
+
+> The diagrams are code: HTML + [Lucide](https://lucide.dev) icons, exported to animated SVG.
+> See [`docs/diagrams/src`](docs/diagrams/src).
+
+## Verify an image
+
+Anyone can check that an image was built by this pipeline and was not tampered with:
+
+```bash
+cosign verify ghcr.io/ea-etn/devops-api:0.1.0 \
   --certificate-identity-regexp '^https://github.com/EA-etn/devops-api/\.github/workflows/ci\.yml@refs/(heads/main|tags/v.*)$' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
 
-**Ver el SBOM** de la imagen publicada:
+<details>
+<summary><b>More: SBOM, security controls and quality gate</b></summary>
+
+Inspect the SBOM:
 
 ```bash
-docker buildx imagetools inspect ghcr.io/ea-etn/devops-api:main --format '{{ json .SBOM }}'
+docker buildx imagetools inspect ghcr.io/ea-etn/devops-api:0.1.0 --format '{{ json .SBOM }}'
 ```
 
-### ☸️ Kubernetes (Helm chart en `chart/devops-api`)
+| Control | Tool | When |
+|---|---|---|
+| Dependency vulnerabilities | Trivy (`fs`) | Every PR and push |
+| Leaked secrets | Trivy (`secret`) | Every PR and push |
+| Misconfigurations (Dockerfile, Helm) | Trivy (`misconfig`) | Every PR and push |
+| Image vulnerabilities | Trivy (`image`) | PR (local image) and `main` (published image) |
+| Software bill of materials | BuildKit (SPDX) | Every published image |
+| Build provenance | BuildKit (SLSA) | Every published image |
+| Image signature | Cosign keyless (Sigstore) | Every published image |
+| Dependency updates | Dependabot (pip, actions, docker) | Weekly |
 
-- Probes de **startup, liveness y readiness** contra `/health`.
-- **Pod Security Standards "restricted"**: no root, sistema de archivos de solo lectura,
-  sin capabilities, `seccomp: RuntimeDefault`, sin token de ServiceAccount.
-- **Rolling updates sin caída** (`maxUnavailable: 0`) y **PodDisruptionBudget**.
-- **HPA** (autoescalado por CPU) opcional.
-- **topologySpreadConstraints**: reparte las réplicas entre nodos (Raspberry Pi y PC).
-- **Ingress** opcional (Traefik en k3s) y **ServiceMonitor** opcional para Prometheus Operator.
-- **`helm test`**: verifica `/health`, `/info` y `/metrics` desde dentro del clúster.
+Findings are published to **Security → Code scanning**. The pipeline **fails** on any fixable
+HIGH/CRITICAL finding.
 
-En cada PR, el pipeline crea un **clúster k3s real de 3 nodos** (k3d), despliega el chart con
-3 réplicas, ejecuta `helm test` y hace un rolling update.
+</details>
 
-Probarlo en local (requiere Docker, [k3d](https://k3d.io) y Helm):
+## Kubernetes & GitOps
+
+<details>
+<summary><b>Run it on a local k3s cluster</b> (Docker, <a href="https://k3d.io">k3d</a> and Helm)</summary>
 
 ```bash
-make cluster      # clúster k3s de 3 nodos
-make deploy       # build + import + helm install
-make helm-test
+make cluster          # 3-node k3s cluster
+make deploy           # build + import + helm install
+make helm-test        # /health, /info and /metrics from inside the cluster
 make cluster-delete
 ```
 
-### 🔄 GitOps con ArgoCD
+</details>
 
-Tras cada merge a `main`, el job `gitops` escribe en `chart/devops-api/values-homelab.yaml`
-la versión exacta de la imagen (`sha-xxxxxxx`). ArgoCD, instalado en el clúster, detecta el
-cambio en Git y lo despliega. **Nadie necesita acceso al clúster para desplegar.**
+<details>
+<summary><b>Deploy with ArgoCD</b> (homelab)</summary>
 
-Puesta en marcha en el homelab (una sola vez):
+After each merge to `main`, the `gitops` job writes the exact image tag (`sha-xxxxxxx`) to
+`chart/devops-api/values-homelab.yaml`. ArgoCD notices the change in Git and deploys it:
+**nobody needs cluster access to deploy.**
 
 ```bash
-# 1. Instalar ArgoCD
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-
-# 2. Registrar la aplicación
 kubectl apply -f deploy/argocd/application.yaml
 ```
 
-| Situación | Qué hace ArgoCD |
+| Situation | What ArgoCD does |
 |---|---|
-| Merge a `main` | Despliega la nueva versión automáticamente |
-| Alguien cambia algo a mano en el clúster | Lo revierte (`selfHeal`) |
-| Un recurso se elimina del chart | Lo borra del clúster (`prune`) |
-| Hay que volver atrás | `git revert` del commit → ArgoCD despliega la versión anterior |
+| Merge to `main` | Deploys the new version |
+| Someone edits the cluster by hand | Reverts it (`selfHeal`) |
+| A resource is removed from the chart | Deletes it (`prune`) |
+| Need to roll back | `git revert` → ArgoCD deploys the previous version |
 
-## Releases
+</details>
 
-```bash
-git tag v0.1.0 && git push origin v0.1.0
-```
+<details>
+<summary><b>Releases and image tags</b></summary>
 
-Publica `ghcr.io/ea-etn/devops-api:0.1.0` y `:0.1`, con SBOM y firma.
+Publish a release from GitHub (**Releases → Draft a new release**, tag `vX.Y.Z`).
 
-| Evento | Etiquetas de imagen |
+| Event | Image tags |
 |---|---|
-| Pull request | (no se publica) |
-| Push a `main` | `main`, `sha-xxxxxxx` |
+| Pull request | (not published) |
+| Push to `main` | `main`, `sha-xxxxxxx` |
 | Tag `v1.2.3` | `1.2.3`, `1.2`, `sha-xxxxxxx` |
 
-## Estructura
+</details>
+
+<details>
+<summary><b>Project structure</b></summary>
 
 ```
 .
-├── app/                         # Código de la API (FastAPI)
-├── tests/                       # Tests (pytest)
+├── app/                         # FastAPI application
+├── tests/                       # pytest
 ├── chart/devops-api/            # Helm chart
-│   ├── values.yaml              #   valores por defecto
-│   └── values-homelab.yaml      #   entorno homelab (actualizado por GitOps)
-├── deploy/argocd/               # Aplicación ArgoCD
+│   ├── values.yaml              #   defaults
+│   └── values-homelab.yaml      #   homelab environment (updated by GitOps)
+├── deploy/argocd/               # ArgoCD Application
+├── docs/diagrams/               # Animated architecture diagrams (+ source)
 ├── .github/workflows/ci.yml     # Pipeline CI/CD
-├── .github/dependabot.yml       # Actualizaciones automáticas
+├── .github/dependabot.yml       # Automatic updates
 ├── Dockerfile
 └── Makefile
 ```
 
-## Lecciones aprendidas
+</details>
 
-Incidentes reales encontrados al construir este proyecto, con causa y solución:
+## Lessons learned
 
-| Problema | Causa | Solución |
+Real incidents hit while building this project:
+
+| Problem | Root cause | Fix |
 |---|---|---|
-| `docker build` falla con **429 Too Many Requests** | Límite de descargas anónimas de Docker Hub | Usar un mirror (`mirror.gcr.io`) para la imagen base |
-| `pip` falla dentro del build: *certificate verify failed* | Un proxy corporativo intercepta HTTPS | Inyectar la CA del proxy **solo** en la etapa de build local, nunca en la imagen final |
-| `trivy-action` falla al instalar Trivy | El script de instalación no podía descargar el binario | Ejecutar la imagen oficial de Trivy **fijada por digest** (además, más seguro) |
-| El rolling update falla: *annotations: expected string* | El chart no convertía a texto anotaciones numéricas | `quote` en la plantilla; lo detectó el test E2E en k3s |
-| En `main` fallan Trivy y Cosign: *could not parse reference* | `github.repository` conserva mayúsculas (`EA-etn`) y Docker exige minúsculas | Normalizar el nombre con `${IMAGE,,}`. Los pasos que solo corren en `main` también necesitan cobertura |
-| El release no ejecuta el pipeline | El tag apuntaba a un commit cuyo mensaje contenía la marca para **omitir CI**; GitHub también lee el título del PR en el commit de merge | Quitar la marca del commit del bot (los push con `GITHUB_TOKEN` no disparan workflows) y no usarla en títulos de PR |
+| `docker build` fails with **429 Too Many Requests** | Docker Hub anonymous pull limit | Pull the base image from a mirror (`mirror.gcr.io`) |
+| `pip` fails inside the build: *certificate verify failed* | A corporate proxy intercepts HTTPS | Inject the proxy CA **only** in a local build stage, never in the final image |
+| `trivy-action` fails to install Trivy | Its install script could not download the binary | Run the official Trivy image **pinned by digest** (also more secure) |
+| Rolling update fails: *annotations: expected string* | The chart did not quote numeric annotations | `quote` in the template, caught by the k3s E2E test |
+| Trivy and Cosign fail on `main`: *could not parse reference* | `github.repository` keeps uppercase (`EA-etn`); Docker needs lowercase | Normalize with `${IMAGE,,}`. Steps that only run on `main` need coverage too |
+| A release does not trigger the pipeline | The tagged commit contained the **skip-CI** marker; GitHub also reads it from PR titles in merge commits | Drop the marker from the bot commit (`GITHUB_TOKEN` pushes never trigger workflows) and keep it out of PR titles |
 
-## Próximos pasos
+## Roadmap
 
-- [ ] Homelab k3s (Raspberry Pi + PC) con ArgoCD
-- [ ] Observabilidad: Prometheus + Grafana + SLOs
-- [ ] Infraestructura cloud con Terraform (GKE/EKS)
+- [x] Secure CI/CD pipeline with multi-arch, signed images
+- [x] Helm chart tested on k3s in every pull request
+- [ ] Homelab k3s cluster (Raspberry Pi + PC) with ArgoCD
+- [ ] Observability: Prometheus, Grafana and SLOs
+- [ ] Cloud infrastructure with Terraform
+
+## License
+
+[MIT](LICENSE)

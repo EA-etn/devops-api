@@ -7,6 +7,10 @@ API mínima en **FastAPI** usada como hilo conductor para practicar el ciclo Dev
 
 > La aplicación es deliberadamente simple. Lo importante es **cómo se construye, se asegura, se prueba y se despliega**.
 
+<p align="center"><img src="docs/img/devops-api-diagram-es.png" alt="Arquitectura de devops-api: del commit al clúster" width="640"></p>
+
+<sub>English version: <a href="docs/img/devops-api-diagram-en.png">docs/img/devops-api-diagram-en.png</a></sub>
+
 ## Arquitectura
 
 ```

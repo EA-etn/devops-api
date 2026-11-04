@@ -1,0 +1,48 @@
+/* Kit de diagramas estilo "dark architecture" */
+:root{
+  --bg:#0b0d12; --card:#15181e; --text:#eef1f6; --muted:#9aa3b2; --line:#8a93a3;
+  --purple:#8b5cf6; --blue:#3b82f6; --green:#10b981; --orange:#f97316; --red:#f43f5e; --cyan:#06b6d4; --yellow:#eab308;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg)}
+body{position:relative;font-family:Inter,sans-serif;color:var(--text);overflow:hidden;
+  background-image:radial-gradient(rgba(255,255,255,.07) 1.2px,transparent 1.2px);background-size:26px 26px}
+
+.title{position:absolute;left:48px;top:34px}
+.title h1{font:700 34px "Inter Display",Inter;letter-spacing:-.01em}
+.title p{font:500 17px Inter;color:var(--muted);margin-top:6px}
+.title .eyebrow{font:600 13px "JetBrains Mono";letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+
+/* Zonas (capas) */
+.zone{position:absolute;border:2px solid var(--c);border-radius:18px;background:color-mix(in srgb,var(--c) 7%,transparent)}
+.zone.dashed{border-style:dashed}
+.zone .zl{position:absolute;left:22px;top:16px;font:600 15px "JetBrains Mono";letter-spacing:.06em;color:var(--c)}
+.zone .zl .soon{margin-left:10px;font:700 11.5px "JetBrains Mono";letter-spacing:.08em;text-transform:uppercase;color:var(--yellow);border:1px solid color-mix(in srgb,var(--yellow) 55%,transparent);background:color-mix(in srgb,var(--yellow) 12%,transparent);border-radius:999px;padding:3px 9px;vertical-align:2px}
+
+/* Tarjetas */
+.card{position:absolute;display:flex;align-items:center;gap:16px;padding:18px 20px;background:var(--card);
+  border:2px solid var(--c,#2a2f3a);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.card.col{flex-direction:column;align-items:flex-start}
+.card .head{display:flex;align-items:center;gap:16px}
+.ico{flex:none;width:56px;height:56px;border-radius:13px;display:grid;place-items:center;
+  background:color-mix(in srgb,var(--c) 18%,#15181e);color:var(--c)}
+.ico svg{width:28px;height:28px;stroke-width:2}
+.card h3{font:600 21px Inter;line-height:1.15}
+.card .sub{font:500 16px Inter;color:var(--muted);margin-top:4px}
+.card .mono{font-family:"JetBrains Mono";font-size:14px}
+
+/* Pastillas */
+.pills{display:flex;flex-wrap:wrap;gap:9px}
+.pill{font:600 15px Inter;color:var(--c);background:color-mix(in srgb,var(--c) 15%,transparent);
+  border:1px solid color-mix(in srgb,var(--c) 30%,transparent);border-radius:10px;padding:7px 12px}
+.pill.mono{font:600 13.5px "JetBrains Mono"}
+
+/* Conectores (SVG superpuesto) */
+svg#wires{position:absolute;inset:0;pointer-events:none;overflow:visible}
+.wl{position:absolute;transform:translate(-50%,-50%);font:500 15px "JetBrains Mono";color:var(--text);
+  background:#1a1d24;border:1px solid #343a46;border-radius:999px;padding:5px 13px;white-space:nowrap}
+
+/* Leyenda */
+.legend{position:absolute;left:48px;right:48px;display:flex;gap:56px;align-items:center}
+.legend span{display:flex;align-items:center;gap:16px;font:500 17px Inter;letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
+.legend i{width:30px;height:30px;border:2.5px solid var(--c);border-radius:5px}

@@ -7,73 +7,37 @@ API mínima en **FastAPI** usada como hilo conductor para practicar el ciclo Dev
 
 > La aplicación es deliberadamente simple. Lo importante es **cómo se construye, se asegura, se prueba y se despliega**.
 
-<p align="center"><img src="docs/img/devops-api-diagram-es.png" alt="Arquitectura de devops-api: del commit al clúster" width="640"></p>
-
-<sub>English version: <a href="docs/img/devops-api-diagram-en.png">docs/img/devops-api-diagram-en.png</a></sub>
+<p align="center"><img src="docs/diagrams/01-general.png" alt="Arquitectura general de devops-api: del commit al clúster"></p>
 
 ## Arquitectura
 
-> Diagrama como código ([Mermaid](https://mermaid.js.org)): GitHub lo dibuja a partir de este texto, así que se versiona y se revisa en los PR igual que el código.
+En una línea:
 
 ```mermaid
-flowchart TB
-    dev([Developer])
-
-    subgraph CI["CI · GitHub Actions · cada pull request"]
-        direction TB
-        subgraph T["2 · Build y pruebas"]
-            direction LR
-            e2e["E2E en k3s<br/><small>3 nodos · helm test · rolling update</small>"]
-            multi["Build multi-arch<br/><small>amd64 · arm64 con QEMU</small>"]
-        end
-        subgraph Q["1 · Calidad"]
-            direction LR
-            lint["Lint y tests<br/><small>ruff · pytest</small>"]
-            sec["Seguridad<br/><small>Trivy: deps · secretos · misconfig</small>"]
-            helm["Helm<br/><small>lint · kubeconform</small>"]
-        end
-    end
-
-    subgraph CD["CD · GitHub Actions · main"]
-        direction LR
-        push["Imagen en GHCR<br/><small>amd64 + arm64 · SBOM · provenance</small>"]
-        scan["Trivy<br/><small>imagen publicada</small>"]
-        sign["Firma<br/><small>Cosign keyless</small>"]
-        bot["Bot GitOps<br/><small>values-homelab.yaml</small>"]
-        push --> scan --> sign --> bot
-    end
-
-    subgraph LAB["Homelab k3s · próximo paso"]
-        direction LR
-        argo["ArgoCD<br/><small>sync · selfHeal · prune</small>"]
-        pi["Raspberry Pi<br/><small>arm64 · control plane</small>"]
-        pc["PC<br/><small>amd64 · worker</small>"]
-        argo --> pi
-        argo --> pc
-    end
-
-    dev -->|pull request| CI
-    CI -->|merge a main| CD
-    CD -->|Git = fuente de verdad| LAB
-
-    classDef ci fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
-    classDef secc fill:#ffe4e6,stroke:#e11d48,color:#881337
-    classDef cd fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
-    classDef git fill:#dcfce7,stroke:#16a34a,color:#14532d
-    classDef lab fill:#cffafe,stroke:#0891b2,color:#164e63
-    classDef actor fill:#f1f5f9,stroke:#475569,color:#0f172a
-    class lint,helm,e2e,multi ci
-    class sec,scan secc
-    class push,sign cd
-    class bot git
-    class argo,pi,pc lab
-    class dev actor
-    style CI fill:#f8fafc,stroke:#94a3b8
-    style Q fill:#ffffff,stroke:#cbd5e1
-    style T fill:#ffffff,stroke:#cbd5e1
-    style CD fill:#f8fafc,stroke:#94a3b8
-    style LAB fill:#f8fafc,stroke:#0891b2,stroke-dasharray: 6 4
+flowchart LR
+    A["Código<br/><small>GitHub</small>"] -->|pull request| B["CI<br/><small>tests · seguridad · k3s</small>"]
+    B -->|merge| C["CD<br/><small>imagen firmada</small>"]
+    C -->|GitOps| D["ArgoCD<br/><small>homelab · próximo paso</small>"]
 ```
+
+### Diagramas detallados
+
+| Diagrama | Qué muestra |
+|---|---|
+| [Pipeline CI/CD](docs/diagrams/02-pipeline.png) | Los jobs de cada pull request y la cadena de pasos en `main` |
+| [Cadena de suministro](docs/diagrams/03-supply-chain.png) | Cómo se escanea, firma y verifica cada imagen |
+| [Kubernetes](docs/diagrams/04-kubernetes.png) | Cómo se despliega el Helm chart en el clúster |
+
+<details>
+<summary>Ver los diagramas aquí</summary>
+
+![Pipeline CI/CD](docs/diagrams/02-pipeline.png)
+![Cadena de suministro](docs/diagrams/03-supply-chain.png)
+![Kubernetes](docs/diagrams/04-kubernetes.png)
+
+</details>
+
+Los diagramas son código (HTML + iconos Lucide): ver [`docs/diagrams/src`](docs/diagrams/src).
 
 ## Endpoints
 

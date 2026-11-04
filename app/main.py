@@ -1,14 +1,20 @@
-"""API mínima para practicar Docker + CI/CD."""
+"""API mínima para practicar Docker, CI/CD, Kubernetes y GitOps."""
 
 import os
 import socket
 from datetime import UTC, datetime
 
 from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 
 APP_VERSION = os.getenv("APP_VERSION", "dev")
 
 app = FastAPI(title="devops-api", version=APP_VERSION)
+
+# Expone /metrics en formato Prometheus: peticiones, latencias y códigos de estado
+Instrumentator(excluded_handlers=["/health", "/metrics"]).instrument(app).expose(
+    app, include_in_schema=False
+)
 
 
 @app.get("/")
@@ -24,6 +30,7 @@ def health() -> dict:
 
 @app.get("/info")
 def info() -> dict:
+    """Hostname = nombre del pod en Kubernetes: permite ver qué réplica responde."""
     return {
         "hostname": socket.gethostname(),
         "version": APP_VERSION,

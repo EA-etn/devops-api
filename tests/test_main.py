@@ -21,3 +21,10 @@ def test_info():
     r = client.get("/info")
     assert r.status_code == 200
     assert {"hostname", "version", "time"} <= r.json().keys()
+
+
+def test_metrics():
+    client.get("/")
+    r = client.get("/metrics")
+    assert r.status_code == 200
+    assert "http_requests_total" in r.text

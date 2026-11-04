@@ -1,0 +1,22 @@
+# Valores del entorno homelab (k3s en Raspberry Pi + PC).
+# ArgoCD despliega el chart con estos valores.
+# El pipeline de CI actualiza image.tag automáticamente tras cada merge a main.
+
+image:
+  tag: main
+
+replicaCount: 2
+
+ingress:
+  enabled: true
+  className: traefik # Ingress controller incluido en k3s
+  hosts:
+    - host: devops-api.home.arpa
+      paths:
+        - path: /
+          pathType: Prefix
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 4

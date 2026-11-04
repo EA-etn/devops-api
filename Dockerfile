@@ -12,7 +12,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 # Usuario sin privilegios (buena práctica de seguridad)
-RUN useradd --create-home --uid 10001 appuser
+RUN groupadd --gid 10001 appuser \
+ && useradd --create-home --uid 10001 --gid 10001 appuser
 
 COPY --from=builder /install /usr/local
 WORKDIR /app
@@ -21,7 +22,8 @@ COPY app/ ./app/
 ARG APP_VERSION=dev
 ENV APP_VERSION=${APP_VERSION}
 
-USER appuser
+# UID numérico: Kubernetes puede verificar runAsNonRoot sin resolver nombres
+USER 10001:10001
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \

@@ -1,0 +1,39 @@
+# Aplicación ArgoCD para el homelab (k3s en Raspberry Pi + PC).
+#
+# Instalación (una sola vez, en el clúster):
+#   kubectl apply -f deploy/argocd/application.yaml
+#
+# A partir de ahí ArgoCD vigila la rama main y sincroniza el clúster con Git:
+#   - cambios en el chart o en values-homelab.yaml  -> se despliegan solos
+#   - cambios hechos a mano en el clúster (drift)    -> se revierten (selfHeal)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devops-api
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/EA-etn/devops-api.git
+    targetRevision: main
+    path: chart/devops-api
+    helm:
+      valueFiles:
+        - values-homelab.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: devops-api
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m

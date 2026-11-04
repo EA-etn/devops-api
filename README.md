@@ -176,6 +176,19 @@ Publica `ghcr.io/ea-etn/devops-api:0.1.0` y `:0.1`, con SBOM y firma.
 └── Makefile
 ```
 
+## Lecciones aprendidas
+
+Incidentes reales encontrados al construir este proyecto, con causa y solución:
+
+| Problema | Causa | Solución |
+|---|---|---|
+| `docker build` falla con **429 Too Many Requests** | Límite de descargas anónimas de Docker Hub | Usar un mirror (`mirror.gcr.io`) para la imagen base |
+| `pip` falla dentro del build: *certificate verify failed* | Un proxy corporativo intercepta HTTPS | Inyectar la CA del proxy **solo** en la etapa de build local, nunca en la imagen final |
+| `trivy-action` falla al instalar Trivy | El script de instalación no podía descargar el binario | Ejecutar la imagen oficial de Trivy **fijada por digest** (además, más seguro) |
+| El rolling update falla: *annotations: expected string* | El chart no convertía a texto anotaciones numéricas | `quote` en la plantilla; lo detectó el test E2E en k3s |
+| En `main` fallan Trivy y Cosign: *could not parse reference* | `github.repository` conserva mayúsculas (`EA-etn`) y Docker exige minúsculas | Normalizar el nombre con `${IMAGE,,}`. Los pasos que solo corren en `main` también necesitan cobertura |
+| El release no ejecuta el pipeline | El tag apuntaba a un commit cuyo mensaje contenía la marca para **omitir CI**; GitHub también lee el título del PR en el commit de merge | Quitar la marca del commit del bot (los push con `GITHUB_TOKEN` no disparan workflows) y no usarla en títulos de PR |
+
 ## Próximos pasos
 
 - [ ] Homelab k3s (Raspberry Pi + PC) con ArgoCD

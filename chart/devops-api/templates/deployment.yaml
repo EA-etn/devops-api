@@ -23,8 +23,9 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8000"
         prometheus.io/path: /metrics
-        {{- with .Values.podAnnotations }}
-        {{- toYaml . | nindent 8 }}
+        {{- /* quote: las anotaciones deben ser texto aunque el valor sea numérico */}}
+        {{- range $key, $value := .Values.podAnnotations }}
+        {{ $key }}: {{ $value | quote }}
         {{- end }}
       labels:
         {{- include "devops-api.labels" . | nindent 8 }}

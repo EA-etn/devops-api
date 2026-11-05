@@ -18,6 +18,10 @@ on:
   push:
     branches: [main]
     tags: ["v*"]
+    # El commit del bot de GitOps solo cambia este archivo: no debe volver a lanzar el
+    # pipeline (evita un bucle). Los filtros de rutas no se aplican a los tags.
+    paths-ignore:
+      - chart/demo-api/values-homelab.yaml
   pull_request:
 
 permissions:
@@ -272,13 +276,17 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
+      # main está protegida por un ruleset: el bot empuja con una deploy key que figura
+      # en la lista de excepciones (bypass) del ruleset. GITHUB_TOKEN no puede saltárselo.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ssh-key: ${{ secrets.GITOPS_DEPLOY_KEY }}
 
       # ArgoCD vigila Git, no el registro: escribimos en Git la versión exacta a desplegar
-      # Sin "[skip ci]": los push hechos con GITHUB_TOKEN no disparan workflows (no hay bucle),
-      # y "[skip ci]" impediría que un tag/release creado sobre este commit ejecute el pipeline.
+      # Sin "[skip ci]": impediría que un tag/release creado sobre este commit ejecute el pipeline.
+      # El bucle se evita con paths-ignore (ver "on:").
       - name: Actualizar image.tag en values-homelab.yaml
         run: |
           TAG="sha-${GITHUB_SHA::7}"

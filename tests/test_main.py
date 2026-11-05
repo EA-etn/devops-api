@@ -20,7 +20,7 @@ def test_health():
 def test_info():
     r = client.get("/info")
     assert r.status_code == 200
-    assert {"hostname", "version", "time"} <= r.json().keys()
+    assert {"hostname", "node", "arch", "version", "time"} <= r.json().keys()
 
 
 def test_metrics():

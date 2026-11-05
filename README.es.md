@@ -1,6 +1,6 @@
 <div align="center">
 
-# devsecops-pipeline
+# DevSecOps Pipeline
 
 **Cada commit: probado, firmado y desplegado.**
 

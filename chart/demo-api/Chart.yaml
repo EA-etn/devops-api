@@ -1,6 +1,6 @@
 apiVersion: v2
 name: demo-api
-description: demo-api, la aplicación de ejemplo que entrega el proyecto devsecops-pipeline
+description: demo-api, la aplicación de ejemplo que entrega el proyecto DevSecOps Pipeline
 type: application
 version: 0.2.0
 appVersion: "0.2.0"

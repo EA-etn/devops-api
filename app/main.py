@@ -9,7 +9,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 
 APP_VERSION = os.getenv("APP_VERSION", "dev")
 
-app = FastAPI(title="devops-api", version=APP_VERSION)
+app = FastAPI(title="demo-api", version=APP_VERSION)
 
 # Expone /metrics en formato Prometheus: peticiones, latencias y códigos de estado
 Instrumentator(excluded_handlers=["/health", "/metrics"]).instrument(app).expose(
@@ -19,7 +19,7 @@ Instrumentator(excluded_handlers=["/health", "/metrics"]).instrument(app).expose
 
 @app.get("/")
 def root() -> dict:
-    return {"message": "Hola desde devops-api", "version": APP_VERSION}
+    return {"message": "Hola desde demo-api", "version": APP_VERSION}
 
 
 @app.get("/health")

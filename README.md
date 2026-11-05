@@ -1,14 +1,14 @@
 <div align="center">
 
-# devops-api
+# devsecops-pipeline
 
 **Every commit: tested, signed, shipped.**
 
-A secure CI/CD pipeline for a small Python API: multi-arch images, supply-chain security,
+A secure CI/CD pipeline, end to end: multi-arch images, supply-chain security,
 Kubernetes E2E tests on every pull request and GitOps delivery.
 
-[![CI/CD](https://github.com/EA-etn/devops-api/actions/workflows/ci.yml/badge.svg)](https://github.com/EA-etn/devops-api/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/EA-etn/devops-api?color=8b5cf6)](https://github.com/EA-etn/devops-api/releases)
+[![CI/CD](https://github.com/EA-etn/devsecops-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/EA-etn/devsecops-pipeline/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/EA-etn/devsecops-pipeline?color=8b5cf6)](https://github.com/EA-etn/devsecops-pipeline/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-10b981)](LICENSE)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-k3s-326CE5?logo=kubernetes&logoColor=white)
 ![Signed with Cosign](https://img.shields.io/badge/signed-Cosign-f97316?logo=sigstore&logoColor=white)
@@ -21,8 +21,9 @@ Kubernetes E2E tests on every pull request and GitOps delivery.
 
 ## Why this project
 
-The app is intentionally tiny. The point is **everything around it**: the same practices a
-platform team uses to ship software safely.
+The project is the **pipeline**. The app it delivers, **`demo-api`**, is intentionally tiny (a few
+JSON endpoints in FastAPI): it is the passenger. The point is everything around it, the same
+practices a platform team uses to ship software safely.
 
 - **Nothing broken reaches `main`:** every pull request runs tests, security scans and a real
   deployment on a 3-node Kubernetes cluster.
@@ -45,7 +46,7 @@ platform team uses to ship software safely.
 ## Quick start
 
 ```bash
-docker run -p 8000:8000 ghcr.io/ea-etn/devops-api:0.1.0
+docker run -p 8000:8000 ghcr.io/ea-etn/demo-api:0.2.0
 curl localhost:8000/info
 ```
 
@@ -87,8 +88,8 @@ make help      # every command
 Anyone can check that an image was built by this pipeline and was not tampered with:
 
 ```bash
-cosign verify ghcr.io/ea-etn/devops-api:0.1.0 \
-  --certificate-identity-regexp '^https://github.com/EA-etn/devops-api/\.github/workflows/ci\.yml@refs/(heads/main|tags/v.*)$' \
+cosign verify ghcr.io/ea-etn/demo-api:0.2.0 \
+  --certificate-identity-regexp '^https://github.com/EA-etn/devsecops-pipeline/\.github/workflows/ci\.yml@refs/(heads/main|tags/v.*)$' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
 
@@ -98,7 +99,7 @@ cosign verify ghcr.io/ea-etn/devops-api:0.1.0 \
 Inspect the SBOM:
 
 ```bash
-docker buildx imagetools inspect ghcr.io/ea-etn/devops-api:0.1.0 --format '{{ json .SBOM }}'
+docker buildx imagetools inspect ghcr.io/ea-etn/demo-api:0.2.0 --format '{{ json .SBOM }}'
 ```
 
 | Control | Tool | When |
@@ -135,7 +136,7 @@ make cluster-delete
 <summary><b>Deploy with ArgoCD</b> (homelab)</summary>
 
 After each merge to `main`, the `gitops` job writes the exact image tag (`sha-xxxxxxx`) to
-`chart/devops-api/values-homelab.yaml`. ArgoCD notices the change in Git and deploys it:
+`chart/demo-api/values-homelab.yaml`. ArgoCD notices the change in Git and deploys it:
 **nobody needs cluster access to deploy.**
 
 ```bash
@@ -173,7 +174,7 @@ Publish a release from GitHub (**Releases → Draft a new release**, tag `vX.Y.Z
 .
 ├── app/                         # FastAPI application
 ├── tests/                       # pytest
-├── chart/devops-api/            # Helm chart
+├── chart/demo-api/            # Helm chart
 │   ├── values.yaml              #   defaults
 │   └── values-homelab.yaml      #   homelab environment (updated by GitOps)
 ├── deploy/argocd/               # ArgoCD Application

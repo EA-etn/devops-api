@@ -28,7 +28,8 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  IMAGE: ghcr.io/${{ github.repository }}
+  # La app que viaja por el pipeline se publica como ghcr.io/<owner>/demo-api
+  IMAGE: ghcr.io/${{ github.repository_owner }}/demo-api
   PLATFORMS: linux/amd64,linux/arm64
   K3D_VERSION: v5.9.0
   KUBECONFORM_VERSION: v0.8.0
@@ -106,14 +107,14 @@ jobs:
 
       - name: helm lint
         run: |
-          helm lint chart/devops-api --strict
-          helm lint chart/devops-api --strict -f chart/devops-api/values-homelab.yaml
+          helm lint chart/demo-api --strict
+          helm lint chart/demo-api --strict -f chart/demo-api/values-homelab.yaml
 
       - name: Validar manifiestos contra el esquema de Kubernetes
         run: |
           for values in values.yaml values-homelab.yaml; do
             echo "== $values"
-            helm template t chart/devops-api -f "chart/devops-api/$values" \
+            helm template t chart/demo-api -f "chart/demo-api/$values" \
               | kubeconform -strict -summary -ignore-missing-schemas -kubernetes-version 1.32.0
           done
 
@@ -133,7 +134,7 @@ jobs:
         with:
           context: .
           load: true
-          tags: devops-api:ci
+          tags: demo-api:ci
           build-args: APP_VERSION=pr-${{ github.event.number }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -141,7 +142,7 @@ jobs:
       - name: Trivy (escaneo de la imagen)
         run: |
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$TRIVY_IMAGE" \
-            image $TRIVY_GATE devops-api:ci
+            image $TRIVY_GATE demo-api:ci
 
       - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
 
@@ -153,32 +154,32 @@ jobs:
 
       - name: Desplegar con Helm
         run: |
-          k3d image import devops-api:ci -c ci
-          helm install devops-api chart/devops-api \
-            --namespace devops-api --create-namespace \
-            --set image.repository=devops-api \
+          k3d image import demo-api:ci -c ci
+          helm install demo-api chart/demo-api \
+            --namespace demo-api --create-namespace \
+            --set image.repository=demo-api \
             --set image.tag=ci \
             --set image.pullPolicy=Never \
             --set replicaCount=3 \
             --wait --timeout 3m
-          kubectl -n devops-api get pods -o wide
+          kubectl -n demo-api get pods -o wide
 
       - name: helm test (health, info, metrics desde dentro del clúster)
-        run: helm test devops-api -n devops-api --logs
+        run: helm test demo-api -n demo-api --logs
 
       - name: Rolling update sin caída
         run: |
-          helm upgrade devops-api chart/devops-api -n devops-api --reuse-values \
+          helm upgrade demo-api chart/demo-api -n demo-api --reuse-values \
             --set podAnnotations.rollout="$GITHUB_RUN_ID" --wait --timeout 3m
-          kubectl -n devops-api rollout status deploy/devops-api
-          kubectl -n devops-api get pods -o wide
+          kubectl -n demo-api rollout status deploy/demo-api
+          kubectl -n demo-api get pods -o wide
 
       - name: Diagnóstico si algo falla
         if: failure()
         run: |
           kubectl get all -A
-          kubectl -n devops-api describe pods
-          kubectl -n devops-api logs -l app.kubernetes.io/name=devops-api --tail=50
+          kubectl -n demo-api describe pods
+          kubectl -n demo-api logs -l app.kubernetes.io/name=demo-api --tail=50
 
   # ------------------------------------------------------ CD: imagen publicada
   build:
@@ -242,8 +243,8 @@ jobs:
       - name: Smoke test arm64
         if: github.event_name == 'pull_request'
         run: |
-          docker buildx build --platform linux/arm64 --load --cache-from type=gha -t devops-api:arm64 .
-          docker run -d --name api --platform linux/arm64 -p 8000:8000 devops-api:arm64
+          docker buildx build --platform linux/arm64 --load --cache-from type=gha -t demo-api:arm64 .
+          docker run -d --name api --platform linux/arm64 -p 8000:8000 demo-api:arm64
           for i in $(seq 1 30); do curl -fs localhost:8000/health && break; sleep 2; done
           echo; docker exec api uname -m
           curl -fs localhost:8000/health || { docker logs api; exit 1; }
@@ -281,7 +282,7 @@ jobs:
       - name: Actualizar image.tag en values-homelab.yaml
         run: |
           TAG="sha-${GITHUB_SHA::7}"
-          sed -i -E "s|^(  tag:).*|\1 ${TAG}|" chart/devops-api/values-homelab.yaml
+          sed -i -E "s|^(  tag:).*|\1 ${TAG}|" chart/demo-api/values-homelab.yaml
           git diff
           if git diff --quiet; then echo "Sin cambios"; exit 0; fi
           git config user.name "github-actions[bot]"

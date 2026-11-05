@@ -1,14 +1,14 @@
 <div align="center">
 
-# devops-api
+# devsecops-pipeline
 
 **Cada commit: probado, firmado y desplegado.**
 
-Pipeline CI/CD seguro para una API mínima en Python: imágenes multi-arquitectura, seguridad de la
-cadena de suministro, pruebas E2E en Kubernetes en cada pull request y despliegue GitOps.
+Pipeline CI/CD seguro de punta a punta: imágenes multi-arquitectura, seguridad de la cadena
+de suministro, pruebas E2E en Kubernetes en cada pull request y despliegue GitOps.
 
-[![CI/CD](https://github.com/EA-etn/devops-api/actions/workflows/ci.yml/badge.svg)](https://github.com/EA-etn/devops-api/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/EA-etn/devops-api?color=8b5cf6)](https://github.com/EA-etn/devops-api/releases)
+[![CI/CD](https://github.com/EA-etn/devsecops-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/EA-etn/devsecops-pipeline/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/EA-etn/devsecops-pipeline?color=8b5cf6)](https://github.com/EA-etn/devsecops-pipeline/releases)
 [![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-10b981)](LICENSE)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-k3s-326CE5?logo=kubernetes&logoColor=white)
 ![Firmado con Cosign](https://img.shields.io/badge/firmado-Cosign-f97316?logo=sigstore&logoColor=white)
@@ -21,8 +21,9 @@ cadena de suministro, pruebas E2E en Kubernetes en cada pull request y despliegu
 
 ## Por qué este proyecto
 
-La aplicación es deliberadamente mínima. Lo importante es **todo lo que la rodea**: las mismas
-prácticas que usa un equipo de plataforma para entregar software de forma segura.
+El proyecto es el **pipeline**. La aplicación que entrega, **`demo-api`**, es deliberadamente mínima
+(unos pocos endpoints JSON en FastAPI): es el pasajero. Lo importante es todo lo que la rodea, las
+mismas prácticas que usa un equipo de plataforma para entregar software de forma segura.
 
 - **Nada roto llega a `main`:** cada pull request ejecuta tests, escaneos de seguridad y un
   despliegue real en un clúster de Kubernetes de 3 nodos.
@@ -45,7 +46,7 @@ prácticas que usa un equipo de plataforma para entregar software de forma segur
 ## Inicio rápido
 
 ```bash
-docker run -p 8000:8000 ghcr.io/ea-etn/devops-api:0.1.0
+docker run -p 8000:8000 ghcr.io/ea-etn/demo-api:0.2.0
 curl localhost:8000/info
 ```
 
@@ -87,8 +88,8 @@ make help      # todos los comandos
 Cualquiera puede comprobar que una imagen la construyó este pipeline y que no fue alterada:
 
 ```bash
-cosign verify ghcr.io/ea-etn/devops-api:0.1.0 \
-  --certificate-identity-regexp '^https://github.com/EA-etn/devops-api/\.github/workflows/ci\.yml@refs/(heads/main|tags/v.*)$' \
+cosign verify ghcr.io/ea-etn/demo-api:0.2.0 \
+  --certificate-identity-regexp '^https://github.com/EA-etn/devsecops-pipeline/\.github/workflows/ci\.yml@refs/(heads/main|tags/v.*)$' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
 
@@ -98,7 +99,7 @@ cosign verify ghcr.io/ea-etn/devops-api:0.1.0 \
 Ver el SBOM:
 
 ```bash
-docker buildx imagetools inspect ghcr.io/ea-etn/devops-api:0.1.0 --format '{{ json .SBOM }}'
+docker buildx imagetools inspect ghcr.io/ea-etn/demo-api:0.2.0 --format '{{ json .SBOM }}'
 ```
 
 | Control | Herramienta | Cuándo |
@@ -135,7 +136,7 @@ make cluster-delete
 <summary><b>Desplegar con ArgoCD</b> (homelab)</summary>
 
 Tras cada merge a `main`, el job `gitops` escribe la versión exacta de la imagen (`sha-xxxxxxx`)
-en `chart/devops-api/values-homelab.yaml`. ArgoCD detecta el cambio en Git y lo despliega:
+en `chart/demo-api/values-homelab.yaml`. ArgoCD detecta el cambio en Git y lo despliega:
 **nadie necesita acceso al clúster para desplegar.**
 
 ```bash
@@ -173,7 +174,7 @@ Publica una release desde GitHub (**Releases → Draft a new release**, tag `vX.
 .
 ├── app/                         # Aplicación FastAPI
 ├── tests/                       # pytest
-├── chart/devops-api/            # Helm chart
+├── chart/demo-api/            # Helm chart
 │   ├── values.yaml              #   valores por defecto
 │   └── values-homelab.yaml      #   entorno homelab (actualizado por GitOps)
 ├── deploy/argocd/               # Application de ArgoCD

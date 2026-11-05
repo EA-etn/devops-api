@@ -11,7 +11,7 @@ ingress:
   enabled: true
   className: traefik # Ingress controller incluido en k3s
   hosts:
-    - host: devops-api.home.arpa
+    - host: demo-api.home.arpa
       paths:
         - path: /
           pathType: Prefix

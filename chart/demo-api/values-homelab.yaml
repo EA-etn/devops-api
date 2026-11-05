@@ -20,3 +20,8 @@ autoscaling:
   enabled: true
   minReplicas: 2
   maxReplicas: 4
+
+# Prometheus (kube-prometheus-stack en el homelab) recoge /metrics con este ServiceMonitor
+serviceMonitor:
+  enabled: true
+  interval: 30s

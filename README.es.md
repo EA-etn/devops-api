@@ -188,7 +188,7 @@ Publica una release desde GitHub (**Releases → Draft a new release**, tag `vX.
 
 ## Lecciones aprendidas
 
-Incidentes reales encontrados al construir este proyecto:
+Incidentes reales encontrados al construir este proyecto ([infografía](docs/diagrams/es/05-incidents.png)):
 
 | Problema | Causa | Solución |
 |---|---|---|

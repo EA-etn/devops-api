@@ -1,0 +1,76 @@
+<!-- size: 1080x1350 -->
+<!-- Infografía de errores reales (formato vertical para LinkedIn) -->
+<style>
+  .inc{position:absolute;width:480px;height:330px;border:2px solid var(--c);border-radius:18px;background:#13161d;
+    padding:22px 24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .inc .ih{display:flex;gap:14px;align-items:center}
+  .inc .ico{width:52px;height:52px}
+  .inc .cat{font:600 12.5px "JetBrains Mono";letter-spacing:.1em;text-transform:uppercase;color:var(--c)}
+  .inc h3{font:700 21px/1.2 Inter;margin-top:4px}
+  .inc .sym{font:500 13.5px/1.45 "JetBrains Mono";color:#fb7185;background:#0b0d12;border:1px solid #2a303c;border-radius:10px;padding:9px 12px}
+  .inc .row{display:flex;gap:12px;font:500 15.5px/1.4 Inter;color:var(--muted)}
+  .inc .row b{flex:none;width:66px;font:600 11.5px "JetBrains Mono";letter-spacing:.08em;text-transform:uppercase;color:#6b7488;padding-top:3px}
+  .inc .row.fix span{color:#e8edf6}
+  .inc .row.les{border-top:1px dashed #2a303c;padding-top:12px;margin-top:auto}
+  .inc .row.les b{color:#10b981}
+  .inc .row.les span{color:#6ee7b7}
+  .foot{position:absolute;left:48px;right:48px;top:1250px;display:flex;justify-content:space-between;align-items:center;
+    font:500 17px Inter;color:var(--muted);border-top:1px solid #272d3a;padding-top:22px}
+  .foot b{font:600 17px "JetBrains Mono";color:var(--text)}
+</style>
+
+<div class="title">
+  <div class="eyebrow">devops-api · postmortems</div>
+  <h1 style="font-size:40px">6 errores reales y cómo se resolvieron</h1>
+  <p>Síntoma, causa y arreglo de lo que se rompió construyendo el pipeline.</p>
+</div>
+
+<div class="inc" style="--c:var(--orange);left:48px;top:190px">
+  <div class="ih"><div class="ico"><i data-icon="cloud-off"></i></div><div><div class="cat">Red · docker build</div><h3>Docker Hub limitó las descargas</h3></div></div>
+  <div class="sym">429 Too Many Requests</div>
+  <div class="row"><b>Causa</b><span>Límite de descargas anónimas por IP, compartida en CI y nubes</span></div>
+  <div class="row fix"><b>Arreglo</b><span>Imagen base desde un mirror: mirror.gcr.io</span></div>
+  <div class="row les"><b>Lección</b><span>En CI real, usa un mirror o credenciales</span></div>
+</div>
+
+<div class="inc" style="--c:var(--orange);left:552px;top:190px">
+  <div class="ih"><div class="ico"><i data-icon="lock-keyhole"></i></div><div><div class="cat">Red · pip</div><h3>Un proxy interceptaba HTTPS</h3></div></div>
+  <div class="sym">SSL: CERTIFICATE_VERIFY_FAILED</div>
+  <div class="row"><b>Causa</b><span>El proxy re-firma el tráfico con una CA que el contenedor no conoce</span></div>
+  <div class="row fix"><b>Arreglo</b><span>Añadir su CA solo en el build local, nunca en la imagen</span></div>
+  <div class="row les"><b>Lección</b><span>Nunca desactives TLS: confía en la CA correcta</span></div>
+</div>
+
+<div class="inc" style="--c:var(--red);left:48px;top:535px">
+  <div class="ih"><div class="ico"><i data-icon="shield-alert"></i></div><div><div class="cat">Seguridad · trivy-action</div><h3>El escáner no llegaba a instalarse</h3></div></div>
+  <div class="sym">Process completed with exit code 6</div>
+  <div class="row"><b>Causa</b><span>El script de la action no podía descargar el binario</span></div>
+  <div class="row fix"><b>Arreglo</b><span>Imagen oficial de Trivy fijada por digest sha256</span></div>
+  <div class="row les"><b>Lección</b><span>Un digest es inmutable; un tag se puede mover</span></div>
+</div>
+
+<div class="inc" style="--c:var(--cyan);left:552px;top:535px">
+  <div class="ih"><div class="ico"><i data-icon="boxes"></i></div><div><div class="cat">Kubernetes · helm</div><h3>Anotaciones numéricas</h3></div></div>
+  <div class="sym">annotations.rollout: expected string</div>
+  <div class="row"><b>Causa</b><span>--set convierte números y el chart no los ponía entre comillas</span></div>
+  <div class="row fix"><b>Arreglo</b><span>| quote en la plantilla. Lo detectó el test E2E en k3s</span></div>
+  <div class="row les"><b>Lección</b><span>helm lint no basta: hay que desplegar de verdad</span></div>
+</div>
+
+<div class="inc" style="--c:var(--blue);left:48px;top:880px">
+  <div class="ih"><div class="ico"><i data-icon="case-upper"></i></div><div><div class="cat">CI/CD · main</div><h3>"EA-etn" en mayúsculas</h3></div></div>
+  <div class="sym">could not parse reference: ghcr.io/EA-etn/…</div>
+  <div class="row"><b>Causa</b><span>github.repository conserva mayúsculas; Docker exige minúsculas</span></div>
+  <div class="row fix"><b>Arreglo</b><span>IMAGE=${IMAGE,,} al inicio del job</span></div>
+  <div class="row les"><b>Lección</b><span>Lo que solo corre en main también necesita pruebas</span></div>
+</div>
+
+<div class="inc" style="--c:var(--blue);left:552px;top:880px">
+  <div class="ih"><div class="ico"><i data-icon="ban"></i></div><div><div class="cat">CI/CD · release</div><h3>[skip ci] dejó la release sin imagen</h3></div></div>
+  <div class="sym">ningún workflow para el tag v0.1.0</div>
+  <div class="row"><b>Causa</b><span>El commit del tag, y luego el título de un PR, llevaban la marca</span></div>
+  <div class="row fix"><b>Arreglo</b><span>Quitarla: los push con GITHUB_TOKEN no disparan workflows</span></div>
+  <div class="row les"><b>Lección</b><span>Entiende el mecanismo antes de añadir algo "por si acaso"</span></div>
+</div>
+
+<div class="foot"><span>Cada incidente está documentado en el README.</span><b>github.com/EA-etn/devops-api</b></div>

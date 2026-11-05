@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "devops-api.fullname" . }}
+  name: {{ include "demo-api.fullname" . }}
   labels:
-    {{- include "devops-api.labels" . | nindent 4 }}
+    {{- include "demo-api.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -16,7 +16,7 @@ spec:
       maxSurge: 1
   selector:
     matchLabels:
-      {{- include "devops-api.selectorLabels" . | nindent 6 }}
+      {{- include "demo-api.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations:
@@ -28,7 +28,7 @@ spec:
         {{ $key }}: {{ $value | quote }}
         {{- end }}
       labels:
-        {{- include "devops-api.labels" . | nindent 8 }}
+        {{- include "demo-api.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -37,13 +37,13 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "devops-api.serviceAccountName" . }}
+      serviceAccountName: {{ include "demo-api.serviceAccountName" . }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          image: {{ include "devops-api.image" . | quote }}
+          image: {{ include "demo-api.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
@@ -77,7 +77,7 @@ spec:
           whenUnsatisfiable: {{ .Values.topologySpread.whenUnsatisfiable }}
           labelSelector:
             matchLabels:
-              {{- include "devops-api.selectorLabels" . | nindent 14 }}
+              {{- include "demo-api.selectorLabels" . | nindent 14 }}
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

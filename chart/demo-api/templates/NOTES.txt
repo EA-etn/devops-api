@@ -1,0 +1,8 @@
+demo-api {{ .Values.image.tag | default .Chart.AppVersion }} desplegada en el namespace {{ .Release.Namespace }}.
+
+Prueba la API:
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "demo-api.fullname" . }} 8080:{{ .Values.service.port }}
+  curl localhost:8080/info
+
+Ejecuta los tests del chart:
+  helm test {{ .Release.Name }} -n {{ .Release.Namespace }}

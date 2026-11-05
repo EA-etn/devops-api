@@ -1,0 +1,9 @@
+apiVersion: v2
+name: demo-api
+description: demo-api, la aplicación de ejemplo que entrega el proyecto devsecops-pipeline
+type: application
+version: 0.2.0
+appVersion: "0.2.0"
+home: https://github.com/EA-etn/devsecops-pipeline
+sources:
+  - https://github.com/EA-etn/devsecops-pipeline

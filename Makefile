@@ -1,7 +1,7 @@
 # Atajos para el día a día. Ejecuta `make help` para ver los comandos.
-IMAGE   ?= devops-api
+IMAGE   ?= demo-api
 TAG     ?= local
-CHART   := chart/devops-api
+CHART   := chart/demo-api
 CLUSTER ?= devops-lab
 
 .PHONY: help install lint format test run docker-build docker-run scan \
@@ -44,13 +44,13 @@ cluster: ## Crea un clúster k3s local de 3 nodos (k3d)
 
 deploy: docker-build ## Despliega la imagen local en el clúster k3d
 	k3d image import $(IMAGE):$(TAG) -c $(CLUSTER)
-	helm upgrade --install devops-api $(CHART) \
+	helm upgrade --install demo-api $(CHART) \
 	  --set image.repository=$(IMAGE) --set image.tag=$(TAG) --set image.pullPolicy=Never \
 	  --wait --timeout 3m
-	kubectl get pods -o wide -l app.kubernetes.io/name=devops-api
+	kubectl get pods -o wide -l app.kubernetes.io/name=demo-api
 
 helm-test: ## Ejecuta los tests del chart contra el despliegue
-	helm test devops-api --logs
+	helm test demo-api --logs
 
 cluster-delete: ## Borra el clúster local
 	k3d cluster delete $(CLUSTER)

@@ -1,5 +1,5 @@
 {
-  "name": "devops-api-diagrams",
+  "name": "devsecops-pipeline-diagrams",
   "private": true,
   "description": "Diagramas de arquitectura como código: HTML + iconos Lucide, renderizados a PNG con Playwright",
   "scripts": {

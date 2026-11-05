@@ -1,9 +1,0 @@
-apiVersion: v2
-name: devops-api
-description: API de práctica DevOps (FastAPI) con buenas prácticas de seguridad y observabilidad
-type: application
-version: 0.1.0
-appVersion: "0.1.0"
-home: https://github.com/EA-etn/devops-api
-sources:
-  - https://github.com/EA-etn/devops-api

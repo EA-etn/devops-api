@@ -9,22 +9,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: devops-api
+  name: demo-api
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://github.com/EA-etn/devops-api.git
+    repoURL: https://github.com/EA-etn/devsecops-pipeline.git
     targetRevision: main
-    path: chart/devops-api
+    path: chart/demo-api
     helm:
       valueFiles:
         - values-homelab.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: devops-api
+    namespace: demo-api
   syncPolicy:
     automated:
       prune: true

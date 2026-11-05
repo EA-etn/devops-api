@@ -1,8 +1,8 @@
-{{- define "devops-api.name" -}}
+{{- define "demo-api.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{- define "devops-api.fullname" -}}
+{{- define "demo-api.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -15,30 +15,30 @@
 {{- end }}
 {{- end }}
 
-{{- define "devops-api.chart" -}}
+{{- define "demo-api.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{- define "devops-api.labels" -}}
-helm.sh/chart: {{ include "devops-api.chart" . }}
-{{ include "devops-api.selectorLabels" . }}
+{{- define "demo-api.labels" -}}
+helm.sh/chart: {{ include "demo-api.chart" . }}
+{{ include "demo-api.selectorLabels" . }}
 app.kubernetes.io/version: {{ .Values.image.tag | default .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
-{{- define "devops-api.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "devops-api.name" . }}
+{{- define "demo-api.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "demo-api.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{- define "devops-api.serviceAccountName" -}}
+{{- define "demo-api.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "devops-api.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "demo-api.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
-{{- define "devops-api.image" -}}
+{{- define "demo-api.image" -}}
 {{- printf "%s:%s" .Values.image.repository (.Values.image.tag | default .Chart.AppVersion) }}
 {{- end }}

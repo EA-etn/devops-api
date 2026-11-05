@@ -11,6 +11,12 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
+# Parches de seguridad del sistema base: la imagen oficial tarda en publicarse
+# tras una CVE nueva, y la puerta de calidad de Trivy bloquea si hay arreglo disponible.
+RUN apt-get update \
+ && apt-get upgrade -y --no-install-recommends \
+ && rm -rf /var/lib/apt/lists/*
+
 # Usuario sin privilegios (buena práctica de seguridad)
 RUN groupadd --gid 10001 appuser \
  && useradd --create-home --uid 10001 --gid 10001 appuser

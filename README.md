@@ -1,6 +1,6 @@
 <div align="center">
 
-# devsecops-pipeline
+# DevSecOps Pipeline
 
 **Every commit: tested, signed, shipped.**
 

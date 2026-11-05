@@ -12,7 +12,7 @@ module.exports = {
     'helm lint no basta: hay que desplegar de verdad': 'helm lint is not enough: deploy for real',
     'Lo que solo corre en main también necesita pruebas': 'Steps that only run on main need testing too',
     'Entiende el mecanismo antes de añadir algo "por si acaso"': 'Understand the mechanism before adding "just in case" fixes',
-    'devsecops-pipeline · postmortems': 'devsecops-pipeline · postmortems',
+    'DevSecOps Pipeline · postmortems': 'DevSecOps Pipeline · postmortems',
     '6 errores reales y cómo se resolvieron': '6 real failures and how they were fixed',
     'Síntoma, causa y arreglo de lo que se rompió construyendo el pipeline.': 'Symptom, root cause and fix for what broke while building the pipeline.',
     'Red · docker build': 'Network · docker build',
@@ -48,7 +48,7 @@ module.exports = {
     '</span> y <span': '</span>, <span',
     'desplegado': 'shipped',
     // 01-general
-    'devsecops-pipeline · arquitectura general': 'devsecops-pipeline · architecture overview',
+    'DevSecOps Pipeline · arquitectura general': 'DevSecOps Pipeline · architecture overview',
     'Cada commit: probado, firmado y desplegado.': 'Every commit: tested, signed, shipped.',
     'código': 'code',
     'git push · PR': 'git push · PR',
@@ -70,7 +70,7 @@ module.exports = {
     'lee Git': 'reads Git',
     'pull de la imagen': 'image pull',
     // 02-pipeline
-    'devsecops-pipeline · github actions': 'devsecops-pipeline · github actions',
+    'DevSecOps Pipeline · github actions': 'DevSecOps Pipeline · github actions',
     'cambio propuesto': 'proposed change',
     '1 · calidad (en paralelo)': '1 · quality (in parallel)',
     'Seguridad': 'Security',
@@ -88,7 +88,7 @@ module.exports = {
       'If any step fails, the pipeline stops: no unscanned or unsigned image ever reaches the cluster.',
     'Validación': 'Validation',
     // 03-supply-chain
-    'devsecops-pipeline · seguridad de la cadena de suministro': 'devsecops-pipeline · supply chain security',
+    'DevSecOps Pipeline · seguridad de la cadena de suministro': 'DevSecOps Pipeline · supply chain security',
     'Cada imagen se escanea, se firma y es verificable': 'Every image is scanned, signed and verifiable',
     '1 · antes del build': '1 · before the build',
     'Actions por SHA': 'SHA-pinned actions',
@@ -116,7 +116,7 @@ module.exports = {
     'Publicación': 'Publish',
     'sin hallazgos': 'no findings',
     // 04-kubernetes
-    'devsecops-pipeline · helm chart en kubernetes': 'devsecops-pipeline · helm chart on kubernetes',
+    'DevSecOps Pipeline · helm chart en kubernetes': 'DevSecOps Pipeline · helm chart on kubernetes',
     'Despliegue en el clúster': 'Deployment on the cluster',
     'Usuario': 'User',
     'navegador · curl': 'browser · curl',

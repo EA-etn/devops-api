@@ -201,6 +201,7 @@ Real incidents hit while building this project ([infographic](docs/diagrams/en/0
 | A release does not trigger the pipeline | The tagged commit contained the **skip-CI** marker; GitHub also reads it from PR titles in merge commits | Drop the marker from the bot commit (`GITHUB_TOKEN` pushes never trigger workflows) and keep it out of PR titles |
 | `main` fails right after a merge: Trivy finds a **new HIGH CVE** in `apt` | Disclosed hours after the PR passed; the official base image was not patched yet | `apt-get upgrade` in the final stage. The gate worked: the image was neither signed nor deployed |
 | The GitOps bot cannot push: `GH013 Repository rule violations` | The `main` ruleset requires status checks, and `GITHUB_TOKEN` cannot bypass it | The bot pushes with an SSH **deploy key** listed as a ruleset bypass; `paths-ignore` stops its commit from re-triggering the pipeline |
+| Pods end in `Error` when they shut down during a rolling update | Uvicorn ≥ 0.29 re-raises `SIGTERM` after a clean shutdown: exit code 143 | `app/serve.py` exits with 0, plus a `preStop` sleep so the Ingress stops routing first. CI proves 0 failed requests during a rollout |
 
 ## Roadmap
 

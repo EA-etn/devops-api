@@ -201,6 +201,7 @@ Incidentes reales encontrados al construir este proyecto ([infografía](docs/dia
 | Una release no ejecuta el pipeline | El commit del tag contenía la marca para **omitir CI**; GitHub también la lee del título del PR en el commit de merge | Quitar la marca del commit del bot (los push con `GITHUB_TOKEN` no disparan workflows) y no usarla en títulos de PR |
 | `main` falla justo después de un merge: Trivy encuentra una **CVE HIGH nueva** en `apt` | Se publicó horas después de que pasara el PR; la imagen base oficial aún no tenía el parche | `apt-get upgrade` en la etapa final. La puerta funcionó: la imagen no se firmó ni se desplegó |
 | El bot de GitOps no puede hacer push: `GH013 Repository rule violations` | El ruleset de `main` exige checks y `GITHUB_TOKEN` no puede saltárselo | El bot empuja con una **deploy key** SSH incluida en el bypass del ruleset; `paths-ignore` evita que su commit relance el pipeline |
+| Los pods terminan en `Error` al apagarse durante un rolling update | Uvicorn ≥ 0.29 relanza `SIGTERM` tras un apagado limpio: código de salida 143 | `app/serve.py` sale con 0, y un `preStop` con espera para que el Ingress deje de enviar tráfico antes. El CI demuestra 0 peticiones fallidas durante un despliegue |
 
 ## Hoja de ruta
 

@@ -1,6 +1,7 @@
 """API mínima para practicar Docker, CI/CD, Kubernetes y GitOps."""
 
 import os
+import platform
 import socket
 from datetime import UTC, datetime
 
@@ -30,9 +31,11 @@ def health() -> dict:
 
 @app.get("/info")
 def info() -> dict:
-    """Hostname = nombre del pod en Kubernetes: permite ver qué réplica responde."""
+    """Qué réplica responde: pod (hostname), nodo de Kubernetes y arquitectura de CPU."""
     return {
         "hostname": socket.gethostname(),
+        "node": os.getenv("NODE_NAME", "unknown"),
+        "arch": platform.machine(),
         "version": APP_VERSION,
         "time": datetime.now(UTC).isoformat(),
     }

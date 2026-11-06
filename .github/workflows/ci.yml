@@ -171,12 +171,26 @@ jobs:
       - name: helm test (health, info, metrics desde dentro del clúster)
         run: helm test demo-api -n demo-api --logs
 
-      - name: Rolling update sin caída
+      # Un pod hace peticiones sin parar al Service durante 60 s mientras se reemplazan
+      # todas las réplicas. Si falla una sola petición, el job falla: demuestra el apagado limpio.
+      - name: Rolling update sin caída (con tráfico continuo)
         run: |
+          kubectl -n demo-api run load --image=curlimages/curl:8.11.1 --restart=Never --command -- sh -c '
+            ok=0; fail=0; end=$(( $(date +%s) + 60 ))
+            while [ "$(date +%s)" -lt "$end" ]; do
+              if curl -fs -m 2 http://demo-api/health >/dev/null; then ok=$((ok+1)); else fail=$((fail+1)); fi
+              sleep 0.1
+            done
+            echo "peticiones correctas=$ok fallidas=$fail"
+            [ "$fail" -eq 0 ]'
+          kubectl -n demo-api wait --for=condition=Ready pod/load --timeout=60s
           helm upgrade demo-api chart/demo-api -n demo-api --reuse-values \
             --set podAnnotations.rollout="$GITHUB_RUN_ID" --wait --timeout 3m
           kubectl -n demo-api rollout status deploy/demo-api
           kubectl -n demo-api get pods -o wide
+          kubectl -n demo-api wait --for=jsonpath='{.status.phase}'=Succeeded pod/load --timeout=120s \
+            || { kubectl -n demo-api logs load; exit 1; }
+          kubectl -n demo-api logs load
 
       - name: Diagnóstico si algo falla
         if: failure()

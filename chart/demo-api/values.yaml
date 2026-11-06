@@ -73,6 +73,12 @@ readinessProbe:
   periodSeconds: 5
   failureThreshold: 2
 
+# Apagado limpio: antes de enviar SIGTERM, el pod espera unos segundos para que el
+# Service y el Ingress dejen de mandarle tráfico (evita errores durante un rolling update).
+lifecycle:
+  preStopSleepSeconds: 5
+terminationGracePeriodSeconds: 30
+
 startupProbe:
   httpGet:
     path: /health
